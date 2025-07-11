@@ -86,66 +86,79 @@
     setInterval(updateCountdown, 1000);
     updateCountdown();
   </script>
-  <script type="module">
+<script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
   import { getFirestore, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
   const firebaseConfig = {
-    apiKey: "AIzaSyCiWN76pTmswQetee7CGdNc6Q845Hrdg8A",
+    apiKey: "...",
     authDomain: "happi12-sites.firebaseapp.com",
     projectId: "happi12-sites",
     storageBucket: "happi12-sites.firebasestorage.app",
     messagingSenderId: "269132427609",
     appId: "1:269132427609:web:049c9b03f8b4224a37dc48"
   };
-
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  const params = new URLSearchParams(window.location.search);
-  const postId = params.get("id");
-
-  if (!postId) {
-    document.getElementById("postTitle").textContent = "❌ Brak ID posta w adresie URL";
-    return;
+  const dbg = document.getElementById("debug");
+  function log(...args) {
+    dbg.textContent += args.map(a => typeof a === "string" ? a : JSON.stringify(a)).join(" ") + "\n";
+  }
+  function fail(msg) {
+    dbg.textContent += "ERROR: " + msg + "\n";
   }
 
-  try {
-    const docRef = doc(db, "posty", postId);
-    const snapshot = await getDoc(docRef);
+  (async () => {
+    log("Start ładowania posta");
+    const params = new URLSearchParams(window.location.search);
+    const postId = params.get("id");
+    log("Pobrane postId:", postId);
 
-    if (!snapshot.exists()) {
+    if (!postId) {
+      fail("Brak ID w URL");
+      document.getElementById("postTitle").textContent = "❌ Brak ID posta";
+      return;
+    }
+
+    const docRef = doc(db, "posty", postId);
+    const snap = await getDoc(docRef);
+    log("Snapshot exists:", snap.exists());
+
+    if (!snap.exists()) {
+      fail("Post nie istnieje");
       document.getElementById("postTitle").textContent = "❌ Post nie istnieje";
       return;
     }
 
-    const post = snapshot.data();
+    const post = snap.data();
+    log("Dane posta:", post);
 
-    // 🔍 Pokaż dane debugowo (tymczasowo)
-    document.getElementById("postTitle").textContent = "📄 Tytuł: " + post.title;
-    document.getElementById("postAuthor").textContent = post.author;
-    document.getElementById("postContent").textContent = post.content;
-    document.getElementById("postViews").textContent = post.views;
+    document.getElementById("postTitle").textContent = post.title ?? "Brak tytułu";
+    document.getElementById("postAuthor").textContent = post.author ?? "Anonim";
+    document.getElementById("postContent").textContent = post.content ?? "Brak treści";
+    document.getElementById("postViews").textContent = post.views ?? "0";
 
+    // czas
     try {
-      let data;
-      if (typeof post.time === "object" && post.time.toDate) {
-        data = post.time.toDate();
-      } else {
-        data = new Date(post.time);
-      }
-      document.getElementById("postDate").textContent = data.toLocaleString("pl-PL");
-    } catch {
+      let dateObj;
+      if (post.time?.toDate) dateObj = post.time.toDate();
+      else dateObj = new Date(post.time);
+      log("Converted time:", dateObj);
+      document.getElementById("postDate").textContent = dateObj.toLocaleString("pl-PL");
+    } catch (e) {
+      fail("Błąd parsowania time: " + e);
       document.getElementById("postDate").textContent = "Brak daty";
     }
 
-    await updateDoc(docRef, {
-      views: increment(1)
-    });
-
-  } catch (err) {
-    document.getElementById("postContent").textContent = "❌ Błąd: " + err.message;
-  }
+    // update views
+    try {
+      await updateDoc(docRef, { views: increment(1) });
+      log("Zaktualizowano views");
+    } catch (e) {
+      fail("Nie udało się zaktualizować views: " + e);
+    }
+  })();
 </script>
   <script type="module">
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
