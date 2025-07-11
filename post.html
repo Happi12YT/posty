@@ -38,11 +38,11 @@
 
   <!-- SEKCJA WAKACYJNA -->
   <section class="post-detail">
-  <h2 id="postTitle">Wczytywanie...</h2>
-  <p><strong>Autor:</strong> <span id="postAuthor">...</span></p>
-  <p><strong>Data publikacji:</strong> <span id="postDate">...</span></p>
-  <p><strong>Wyświetlenia:</strong> <span id="postViews">...</span></p>
-  <div id="postContent">...</div>
+    <h2 id="postTitle">Wczytywanie...</h2>
+<p><strong>Autor:</strong> <span id="postAuthor">...</span></p>
+<p><strong>Data publikacji:</strong> <span id="postDate">...</span></p>
+<p><strong>Wyświetlenia:</strong> <span id="postViews">...</span></p>
+<div id="postContent">...</div>
 </section>
 
 
@@ -84,7 +84,6 @@
     }
     setInterval(updateCountdown, 1000);
     updateCountdown();
-  </script>
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
   import { getFirestore, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
@@ -101,43 +100,41 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // 🔍 Pobierz ID z URL
   const params = new URLSearchParams(window.location.search);
   const postId = params.get("id");
 
   if (!postId) {
-    document.body.innerHTML = "<h2>Brak ID posta w adresie URL</h2>";
-    throw new Error("Nie podano ID posta");
+    document.getElementById("postTitle").textContent = "❌ Brak ID posta";
+    return;
   }
 
-  // 📦 Pobierz dane posta
   const docRef = doc(db, "posty", postId);
   const snapshot = await getDoc(docRef);
 
   if (snapshot.exists()) {
     const post = snapshot.data();
-    document.getElementById("postTitle").textContent = post.title;
-    document.getElementById("postAuthor").textContent = post.author || "Anonim";
-    document.getElementById("postContent").textContent = post.content || "...";
+    document.getElementById("postTitle").textContent = post.title ?? "Brak tytułu";
+    document.getElementById("postAuthor").textContent = post.author ?? "Brak autora";
+    document.getElementById("postContent").textContent = post.content ?? "Brak treści";
     document.getElementById("postViews").textContent = post.views ?? 0;
 
-    // 🕓 Data publikacji
-    if (post.time) {
+    try {
       let data;
-if (typeof post.time === "object" && post.time.toDate) {
-  data = post.time.toDate(); // Timestamp z Firestore
-} else {
-  data = new Date(post.time); // Liczba z Date.now()
-}
+      if (typeof post.time === "object" && post.time.toDate) {
+        data = post.time.toDate();
+      } else {
+        data = new Date(post.time);
+      }
       document.getElementById("postDate").textContent = data.toLocaleString("pl-PL");
+    } catch {
+      document.getElementById("postDate").textContent = "Brak daty";
     }
 
-    // ➕ Zwiększ wyświetlenia
     await updateDoc(docRef, {
       views: increment(1)
     });
   } else {
-    document.getElementById("postTitle").textContent = "Post nie istnieje";
+    document.getElementById("postTitle").textContent = "❌ Post nie istnieje";
     document.getElementById("postContent").textContent = "";
   }
 </script>
