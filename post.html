@@ -105,19 +105,26 @@
   const postId = params.get("id");
 
   if (!postId) {
-    document.getElementById("postTitle").textContent = "❌ Brak ID posta";
+    document.getElementById("postTitle").textContent = "❌ Brak ID posta w adresie URL";
     return;
   }
 
-  const docRef = doc(db, "posty", postId);
-  const snapshot = await getDoc(docRef);
+  try {
+    const docRef = doc(db, "posty", postId);
+    const snapshot = await getDoc(docRef);
 
-  if (snapshot.exists()) {
+    if (!snapshot.exists()) {
+      document.getElementById("postTitle").textContent = "❌ Post nie istnieje";
+      return;
+    }
+
     const post = snapshot.data();
-    document.getElementById("postTitle").textContent = post.title ?? "Brak tytułu";
-    document.getElementById("postAuthor").textContent = post.author ?? "Brak autora";
-    document.getElementById("postContent").textContent = post.content ?? "Brak treści";
-    document.getElementById("postViews").textContent = post.views ?? 0;
+
+    // 🔍 Pokaż dane debugowo (tymczasowo)
+    document.getElementById("postTitle").textContent = "📄 Tytuł: " + post.title;
+    document.getElementById("postAuthor").textContent = post.author;
+    document.getElementById("postContent").textContent = post.content;
+    document.getElementById("postViews").textContent = post.views;
 
     try {
       let data;
@@ -134,9 +141,9 @@
     await updateDoc(docRef, {
       views: increment(1)
     });
-  } else {
-    document.getElementById("postTitle").textContent = "❌ Post nie istnieje";
-    document.getElementById("postContent").textContent = "";
+
+  } catch (err) {
+    document.getElementById("postContent").textContent = "❌ Błąd: " + err.message;
   }
 </script>
 </body>
