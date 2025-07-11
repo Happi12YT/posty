@@ -3,57 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Happi12 – Strona Główna</title>
+  <title>Happi12 – Post</title>
   <link rel="stylesheet" href="style.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-  <!-- NAVBAR -->
   <nav class="navbar">
     <div class="logo-box">
       <img src="https://happi12yt.github.io/strona-glowna/Nowy%20projekt_1751898655372.png" alt="Logo Happi12"/>
       <span>Happi12</span>
     </div>
-    <div class="menu-container" id="menuContainer">
-      <div class="menu-button" onclick="toggleMenu()">
-        <span></span><span></span><span></span>
-      </div>
-      <div class="menu-panel">
-        <div class="close" onclick="toggleMenu()">×</div>
-        <ul>
-          <li><a href="#start">Start</a></li>
-          <li><a href="#wakacje">Wakacje</a></li>
-          <li><a href="#kontakt">Kontakt</a></li>
-        </ul>
-      </div>
-    </div>
   </nav>
 
-  <!-- HERO -->
-  <header class="hero" id="start">
-    <h1>Witajcie na mojej stronie internetowej!</h1>
-    <p>Jestem <strong>Happi12</strong> i codziennie publikuję odcinki na YouTube — o 22:00 w wakacje, o 20:00 w roku szkolnym.</p>
+  <header class="hero">
+    <h1 id="postTitle">Ładowanie posta...</h1>
+    <p><strong>Autor:</strong> <span id="postAuthor">...</span></p>
+    <p><strong>Data publikacji:</strong> <span id="postDate">...</span></p>
+    <p><strong>Wyświetlenia:</strong> <span id="postViews">...</span></p>
   </header>
 
-  <!-- SEKCJA WAKACYJNA -->
   <section class="post-detail">
-  <h2 id="postTitle">Wczytywanie...</h2>
-  <p><strong>Autor:</strong> <span id="postAuthor">...</span></p>
-  <p><strong>Data publikacji:</strong> <span id="postDate">...</span></p>
-  <p><strong>Wyświetlenia:</strong> <span id="postViews">...</span></p>
-  <div id="postContent">...</div>
-</section>
+    <div id="postContent">...</div>
+  </section>
 
-
-  <!-- COUNTDOWN -->
-  <div class="countdown-box">
-    <p>Do następnego odcinka zostało:</p>
-    <div id="countdown"></div>
-  </div>
-
-  <!-- FOOTER -->
-  <footer class="footer" id="kontakt">
+  <footer class="footer">
     <div class="footer-links">
       <a href="#">Kontakt</a>
       <a href="#">Discord</a>
@@ -62,84 +36,67 @@
     <p>© 2025 Happi12</p>
   </footer>
 
-  <script>
-    function toggleMenu() {
-      document.getElementById('menuContainer').classList.toggle('active');
-    }
-    function scrollToTimer() {
-      document.querySelector('.countdown-box')
-              .scrollIntoView({ behavior: 'smooth' });
-    }
-    function updateCountdown() {
-      const now = new Date();
-      const target = new Date();
-      target.setHours(22, 0, 0, 0);
-      if (now > target) target.setDate(target.getDate() + 1);
-      const diff = target - now;
-      const hrs = Math.floor(diff / 1000 / 60 / 60);
-      const mins = Math.floor((diff / 1000 / 60) % 60);
-      const secs = Math.floor((diff / 1000) % 60);
-      document.getElementById('countdown').textContent =
-        `${hrs}h ${mins}m ${secs}s`;
-    }
-    setInterval(updateCountdown, 1000);
-    updateCountdown();
-  </script>
   <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-  import { getFirestore, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCiWN76pTmswQetee7CGdNc6Q845Hrdg8A",
-    authDomain: "happi12-sites.firebaseapp.com",
-    projectId: "happi12-sites",
-    storageBucket: "happi12-sites.firebasestorage.app",
-    messagingSenderId: "269132427609",
-    appId: "1:269132427609:web:049c9b03f8b4224a37dc48"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyCiWN76pTmswQetee7CGdNc6Q845Hrdg8A",
+      authDomain: "happi12-sites.firebaseapp.com",
+      projectId: "happi12-sites",
+      storageBucket: "happi12-sites.firebasestorage.app",
+      messagingSenderId: "269132427609",
+      appId: "1:269132427609:web:049c9b03f8b4224a37dc48"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-  // 🔍 Pobierz ID z URL
-  const params = new URLSearchParams(window.location.search);
-  const postId = params.get("id");
+    const params = new URLSearchParams(window.location.search);
+    const postId = params.get("id");
 
-  if (!postId) {
-    document.body.innerHTML = "<h2>Brak ID posta w adresie URL</h2>";
-    throw new Error("Nie podano ID posta");
-  }
-
-  // 📦 Pobierz dane posta
-  const docRef = doc(db, "posty", postId);
-  const snapshot = await getDoc(docRef);
-
-  if (snapshot.exists()) {
-    const post = snapshot.data();
-    document.getElementById("postTitle").textContent = post.title;
-    document.getElementById("postAuthor").textContent = post.author || "Anonim";
-    document.getElementById("postContent").textContent = post.content || "...";
-    document.getElementById("postViews").textContent = post.views ?? 0;
-
-    // 🕓 Data publikacji
-    if (post.time) {
-      let data;
-if (typeof post.time === "object" && post.time.toDate) {
-  data = post.time.toDate(); // Timestamp z Firestore
-} else {
-  data = new Date(post.time); // Liczba z Date.now()
-}
-      document.getElementById("postDate").textContent = data.toLocaleString("pl-PL");
+    if (!postId) {
+      document.body.innerHTML = "<h2>Brak ID posta w adresie URL</h2>";
+      throw new Error("Brak ID posta");
     }
 
-    // ➕ Zwiększ wyświetlenia
-    await updateDoc(docRef, {
-      views: increment(1)
-    });
-  } else {
-    document.getElementById("postTitle").textContent = "Post nie istnieje";
-    document.getElementById("postContent").textContent = "";
-  }
-</script>
+    const docRef = doc(db, "posty", postId);
+    const snapshot = await getDoc(docRef);
+
+    if (snapshot.exists()) {
+      const post = snapshot.data();
+
+      document.getElementById("postTitle").textContent = post.title ?? "Brak tytułu";
+      document.getElementById("postAuthor").textContent = post.author ?? "Anonim";
+      document.getElementById("postContent").textContent = post.content ?? "Brak treści";
+      document.getElementById("postViews").textContent = post.views ?? 0;
+
+      // Data publikacji — obsługa różnych typów
+      try {
+        let data;
+        if (typeof post.time === "object" && post.time.toDate) {
+          data = post.time.toDate(); // Timestamp
+        } else {
+          data = new Date(post.time); // Liczba
+        }
+        document.getElementById("postDate").textContent = data.toLocaleString("pl-PL");
+      } catch (err) {
+        document.getElementById("postDate").textContent = "Brak daty";
+      }
+
+      // Aktualizacja liczby wyświetleń
+      try {
+        await updateDoc(docRef, {
+          views: increment(1)
+        });
+      } catch (err) {
+        console.warn("Nie udało się zaktualizować views:", err.message);
+      }
+
+    } else {
+      document.getElementById("postTitle").textContent = "Post nie istnieje";
+      document.getElementById("postContent").textContent = "";
+    }
+  </script>
 </body>
 </html>
