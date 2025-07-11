@@ -85,7 +85,7 @@
   </script>
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCiWN76pTmswQetee7CGdNc6Q845Hrdg8A",
@@ -99,6 +99,7 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
+  // 🔍 Pobierz ID z URL
   const params = new URLSearchParams(window.location.search);
   const postId = params.get("id");
 
@@ -107,18 +108,31 @@
     throw new Error("Nie podano ID posta");
   }
 
+  // 📦 Pobierz dane posta
   const docRef = doc(db, "posty", postId);
   const snapshot = await getDoc(docRef);
 
   if (snapshot.exists()) {
     const post = snapshot.data();
     document.getElementById("postTitle").textContent = post.title;
-    document.getElementById("postAuthor").textContent = post.author;
-    document.getElementById("postContent").textContent = post.content;
+    document.getElementById("postAuthor").textContent = post.author || "Anonim";
+    document.getElementById("postContent").textContent = post.content || "...";
+    document.getElementById("postViews").textContent = post.views ?? 0;
+
+    // 🕓 Data publikacji
+    if (post.time) {
+      const data = new Date(post.time);
+      document.getElementById("postDate").textContent = data.toLocaleString("pl-PL");
+    }
+
+    // ➕ Zwiększ wyświetlenia
+    await updateDoc(docRef, {
+      views: increment(1)
+    });
   } else {
     document.getElementById("postTitle").textContent = "Post nie istnieje";
     document.getElementById("postContent").textContent = "";
   }
-    </script>
+</script>
 </body>
 </html>
