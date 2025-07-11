@@ -37,13 +37,12 @@
   </header>
 
   <!-- SEKCJA WAKACYJNA -->
-  <section class="summer" id="wakacje">
-    <h2>Mamy wakacje! 😎</h2>
-    <p>Zobaczcie ile zostało do końca wakacji i kiedy odpalam live!</p>
-    <button onclick="window.location.href='https://happi12yt.github.io/licznik/koniec_wakacji'">
-  Zobacz tutaj
-    </button>
+  <section class="post-detail">
+  <h2 id="postTitle">Wczytywanie...</h2>
+  <p><strong>Autor:</strong> <span id="postAuthor">...</span></p>
+  <div id="postContent">...</div>
   </section>
+
 
   <!-- COUNTDOWN -->
   <div class="countdown-box">
@@ -84,5 +83,42 @@
     setInterval(updateCountdown, 1000);
     updateCountdown();
   </script>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCiWN76pTmswQetee7CGdNc6Q845Hrdg8A",
+    authDomain: "happi12-sites.firebaseapp.com",
+    projectId: "happi12-sites",
+    storageBucket: "happi12-sites.firebasestorage.app",
+    messagingSenderId: "269132427609",
+    appId: "1:269132427609:web:049c9b03f8b4224a37dc48"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const params = new URLSearchParams(window.location.search);
+  const postId = params.get("id");
+
+  if (!postId) {
+    document.body.innerHTML = "<h2>Brak ID posta w adresie URL</h2>";
+    throw new Error("Nie podano ID posta");
+  }
+
+  const docRef = doc(db, "posty", postId);
+  const snapshot = await getDoc(docRef);
+
+  if (snapshot.exists()) {
+    const post = snapshot.data();
+    document.getElementById("postTitle").textContent = post.title;
+    document.getElementById("postAuthor").textContent = post.author;
+    document.getElementById("postContent").textContent = post.content;
+  } else {
+    document.getElementById("postTitle").textContent = "Post nie istnieje";
+    document.getElementById("postContent").textContent = "";
+  }
+    </script>
 </body>
   </html>
