@@ -37,11 +37,49 @@
   </header>
 
   <!-- SEKCJA WAKACYJNA -->
-  <section class="post-detail">
-  <h2 id="postTitle">Wczytywanie...</h2>
-  <p><strong>Autor:</strong> <span id="postAuthor">...</span></p>
-  <div id="postContent">...</div>
-  </section>
+  <section class="lista-postow">
+  <h2>Posty społeczności Happi12</h2>
+  <div id="listaPostow"></div>
+</section>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+  import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCiWN76pTmswQetee7CGdNc6Q845Hrdg8A",
+    authDomain: "happi12-sites.firebaseapp.com",
+    projectId: "happi12-sites",
+    storageBucket: "happi12-sites.firebasestorage.app",
+    messagingSenderId: "269132427609",
+    appId: "1:269132427609:web:049c9b03f8b4224a37dc48"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const lista = document.getElementById("listaPostow");
+
+  const q = query(collection(db, "posty"), orderBy("time", "desc"));
+  const snapshot = await getDocs(q);
+  if (snapshot.empty) {
+    lista.innerHTML = "<p>Brak postów</p>";
+  } else {
+    snapshot.forEach(doc => {
+      const post = doc.data();
+      const div = document.createElement("div");
+      div.className = "post-box";
+      div.innerHTML = `
+        <a href="/post.html?id=${doc.id}">
+          <h4>${post.title}</h4>
+          <p>${post.content.substring(0, 100)}...</p>
+        </a>
+        <small>Autor: ${post.author || "Anonim"}</small>
+      `;
+      lista.appendChild(div);
+    });
+  }
+</script>
 
 
   <!-- COUNTDOWN -->
@@ -60,65 +98,5 @@
     <p>© 2025 Happi12</p>
   </footer>
 
-  <script>
-    function toggleMenu() {
-      document.getElementById('menuContainer').classList.toggle('active');
-    }
-    function scrollToTimer() {
-      document.querySelector('.countdown-box')
-              .scrollIntoView({ behavior: 'smooth' });
-    }
-    function updateCountdown() {
-      const now = new Date();
-      const target = new Date();
-      target.setHours(22, 0, 0, 0);
-      if (now > target) target.setDate(target.getDate() + 1);
-      const diff = target - now;
-      const hrs = Math.floor(diff / 1000 / 60 / 60);
-      const mins = Math.floor((diff / 1000 / 60) % 60);
-      const secs = Math.floor((diff / 1000) % 60);
-      document.getElementById('countdown').textContent =
-        `${hrs}h ${mins}m ${secs}s`;
-    }
-    setInterval(updateCountdown, 1000);
-    updateCountdown();
-  </script>
-  <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyCiWN76pTmswQetee7CGdNc6Q845Hrdg8A",
-    authDomain: "happi12-sites.firebaseapp.com",
-    projectId: "happi12-sites",
-    storageBucket: "happi12-sites.firebasestorage.app",
-    messagingSenderId: "269132427609",
-    appId: "1:269132427609:web:049c9b03f8b4224a37dc48"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  const params = new URLSearchParams(window.location.search);
-  const postId = params.get("id");
-
-  if (!postId) {
-    document.body.innerHTML = "<h2>Brak ID posta w adresie URL</h2>";
-    throw new Error("Nie podano ID posta");
-  }
-
-  const docRef = doc(db, "posty", postId);
-  const snapshot = await getDoc(docRef);
-
-  if (snapshot.exists()) {
-    const post = snapshot.data();
-    document.getElementById("postTitle").textContent = post.title;
-    document.getElementById("postAuthor").textContent = post.author;
-    document.getElementById("postContent").textContent = post.content;
-  } else {
-    document.getElementById("postTitle").textContent = "Post nie istnieje";
-    document.getElementById("postContent").textContent = "";
-  }
-    </script>
-</body>
+ </body>
   </html>
