@@ -217,3 +217,14 @@ body {
   font-size: 14px;
   color: #555;
 }
+
+.post-box a {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.post-box a:hover h4 {
+  color: #0077cc;
+  text-decoration: underline;
+}
