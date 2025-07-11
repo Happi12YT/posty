@@ -123,7 +123,12 @@
 
     // 🕓 Data publikacji
     if (post.time) {
-      const data = new Date(post.time);
+      let data;
+if (typeof post.time === "object" && post.time.toDate) {
+  data = post.time.toDate(); // Timestamp z Firestore
+} else {
+  data = new Date(post.time); // Liczba z Date.now()
+}
       document.getElementById("postDate").textContent = data.toLocaleString("pl-PL");
     }
 
