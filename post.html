@@ -44,6 +44,8 @@
 <p><strong>Data publikacji:</strong> <span id="postDate">...</span></p>
 <p><strong>Wyświetlenia:</strong> <span id="postViews">...</span></p>
 <div id="postContent">...</div>
+    <h2 id="postTitle">Wczytywanie...</h2>
+<pre id="debug" style="white-space: pre-wrap; color: red;"></pre>
 </section>
 
 
@@ -86,80 +88,55 @@
     setInterval(updateCountdown, 1000);
     updateCountdown();
   </script>
-<script type="module">
+  <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
   import { getFirestore, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
   const firebaseConfig = {
-    apiKey: "...",
+    apiKey: "AIzaSyCiWN76pTmswQetee7CGdNc6Q845Hrdg8A",
     authDomain: "happi12-sites.firebaseapp.com",
     projectId: "happi12-sites",
     storageBucket: "happi12-sites.firebasestorage.app",
     messagingSenderId: "269132427609",
     appId: "1:269132427609:web:049c9b03f8b4224a37dc48"
   };
+
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  const dbg = document.getElementById("debug");
-  function log(...args) {
-    dbg.textContent += args.map(a => typeof a === "string" ? a : JSON.stringify(a)).join(" ") + "\n";
-  }
-  function fail(msg) {
-    dbg.textContent += "ERROR: " + msg + "\n";
-  }
+  const D = (id, val) => document.getElementById(id).textContent = val;
+  const debug = document.getElementById("debug");
 
   (async () => {
-    log("Start ładowania posta");
-    const params = new URLSearchParams(window.location.search);
-    const postId = params.get("id");
-    log("Pobrane postId:", postId);
-
-    if (!postId) {
-      fail("Brak ID w URL");
-      document.getElementById("postTitle").textContent = "❌ Brak ID posta";
-      return;
-    }
-
-    const docRef = doc(db, "posty", postId);
-    const snap = await getDoc(docRef);
-    log("Snapshot exists:", snap.exists());
-
-    if (!snap.exists()) {
-      fail("Post nie istnieje");
-      document.getElementById("postTitle").textContent = "❌ Post nie istnieje";
-      return;
-    }
-
-    const post = snap.data();
-    log("Dane posta:", post);
-
-    document.getElementById("postTitle").textContent = post.title ?? "Brak tytułu";
-    document.getElementById("postAuthor").textContent = post.author ?? "Anonim";
-    document.getElementById("postContent").textContent = post.content ?? "Brak treści";
-    document.getElementById("postViews").textContent = post.views ?? "0";
-
-    // czas
     try {
-      let dateObj;
-      if (post.time?.toDate) dateObj = post.time.toDate();
-      else dateObj = new Date(post.time);
-      log("Converted time:", dateObj);
-      document.getElementById("postDate").textContent = dateObj.toLocaleString("pl-PL");
-    } catch (e) {
-      fail("Błąd parsowania time: " + e);
-      document.getElementById("postDate").textContent = "Brak daty";
-    }
+      const postId = new URLSearchParams(location.search).get("id");
+      if (!postId) throw new Error("Brak ID posta w adresie URL");
 
-    // update views
-    try {
+      const docRef = doc(db, "posty", postId);
+      const snap = await getDoc(docRef);
+      if (!snap.exists()) throw new Error("Post nie istnieje w bazie");
+
+      const post = snap.data();
+      D("postTitle", post.title ?? "Brak tytułu");
+      D("postAuthor", post.author ?? "Anonim");
+      D("postContent", post.content ?? "Brak treści");
+      D("postViews", post.views ?? "0");
+
+      try {
+        const data = post.time?.toDate ? post.time.toDate() : new Date(post.time);
+        D("postDate", data.toLocaleString("pl-PL"));
+      } catch {
+        D("postDate", "Brak daty");
+      }
+
       await updateDoc(docRef, { views: increment(1) });
-      log("Zaktualizowano views");
-    } catch (e) {
-      fail("Nie udało się zaktualizować views: " + e);
+    } catch (err) {
+      debug.textContent = "❌ " + err.message;
+      D("postTitle", "Błąd ładowania posta");
+      D("postContent", "");
     }
   })();
-</script>
+    </script>
   <script type="module">
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
