@@ -87,9 +87,15 @@
     }
     setInterval(updateCountdown, 1000);
     updateCountdown();
-  </script><script type="module">
+  </script>
+  <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-  import { getFirestore, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+  import {
+    getFirestore,
+    doc,
+    getDoc,
+    setDoc
+  } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCiWN76pTmswQetee7CGdNc6Q845Hrdg8A",
@@ -131,15 +137,13 @@
         D("postDate", "Brak daty");
       }
 
-      // Zwiększenie wyświetleń
+      // Zwiększenie wyświetleń — za pomocą setDoc (działa bez logowania)
       try {
-        import { setDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
-
-// Bez increment, ręczne zwiększanie
-const currentViews = typeof post.views === "number" ? post.views : 0;
-await setDoc(docRef, { views: currentViews + 1 }, { merge: true });
+        const currentViews = typeof post.views === "number" ? post.views : 0;
+        await setDoc(docRef, { views: currentViews + 1 }, { merge: true });
+        D("postViews", currentViews + 1);
       } catch (e) {
-        debug.textContent = "❌ updateDoc error: " + JSON.stringify(e, null, 2);
+        debug.textContent = "❌ Nie udało się zaktualizować views: " + e.message;
       }
 
     } catch (err) {
@@ -148,7 +152,7 @@ await setDoc(docRef, { views: currentViews + 1 }, { merge: true });
       D("postContent", "");
     }
   })();
-          </script>
+  </script>
   <script type="module">
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
