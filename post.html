@@ -135,7 +135,7 @@
       try {
         await updateDoc(docRef, { views: increment(1) });
       } catch (e) {
-        debug.textContent = "❌ Nie udało się zaktualizować views: " + e.message;
+        debug.textContent = "❌ updateDoc error: " + JSON.stringify(e, null, 2);
       }
 
     } catch (err) {
