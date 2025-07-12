@@ -133,7 +133,11 @@
 
       // Zwiększenie wyświetleń
       try {
-        await updateDoc(docRef, { views: increment(1) });
+        import { setDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+// Bez increment, ręczne zwiększanie
+const currentViews = typeof post.views === "number" ? post.views : 0;
+await setDoc(docRef, { views: currentViews + 1 }, { merge: true });
       } catch (e) {
         debug.textContent = "❌ updateDoc error: " + JSON.stringify(e, null, 2);
       }
