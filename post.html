@@ -39,6 +39,7 @@
   <!-- SEKCJA WAKACYJNA -->
   <section class="post-detail">
     <h2 id="postTitle">Wczytywanie...</h2>
+    <img id="postImage" alt="Obrazek posta" style="max-width:100%; margin:10px 0; border-radius:8px; display:none;" />
 <p><strong>Autor:</strong> <span id="postAuthor">...</span></p>
 <p><strong>Data publikacji:</strong> <span id="postDate">...</span></p>
 <p><strong>Wyświetlenia:</strong> <span id="postViews">...</span></p>
@@ -121,7 +122,6 @@
 
       const post = snap.data();
       D("postTitle", post.title ?? "Brak tytułu");
-      <img id="postImage" alt="Obrazek posta" style="max-width:100%; margin:10px 0; border-radius:8px; display:none;" />
       D("postAuthor", post.author ?? "Anonim");
       D("postContent", post.content ?? "Brak treści");
       D("postViews", post.views ?? "0");
