@@ -121,10 +121,17 @@
 
       const post = snap.data();
       D("postTitle", post.title ?? "Brak tytułu");
+      <img id="postImage" alt="Obrazek posta" style="max-width:100%; margin:10px 0; border-radius:8px; display:none;" />
       D("postAuthor", post.author ?? "Anonim");
       D("postContent", post.content ?? "Brak treści");
       D("postViews", post.views ?? "0");
-      D("postimageUrl", post.imageUrl ?? "");                                          
+      
+      if (post.imageUrl) {
+  const img = document.getElementById("postImage");
+  img.src = post.imageUrl;
+  img.style.display = "block";
+}
+                                       
       
 
       // Obsługa daty
